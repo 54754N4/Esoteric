@@ -12,7 +12,7 @@ Transpiles esoteric languages to more verbose languages as described in the foll
 
 ## Transpilation Example
 
-#### Loading data
+### Loading data
 
 Before the data can be given to the lexer/parser/transpilers, they need to be loaded into a `CharStream` instance, as such:
 
@@ -23,7 +23,7 @@ CharStream stream = CharStream.of(stringVariable);
 CharStream stream = CharStream.of(new File(filePath));
 ```
 
-#### Brainfuck Transpilation
+### Brainfuck Transpilation
 
 After creating the `CharStream`, you can then transpile into any target (in this example `Java`).
 Let's suppose we have the following "hello world" `Brainfuck` code:
@@ -48,7 +48,7 @@ System.out.println(transpiler.transpile(optimised));
 
 Which prints the following [Java code](https://pastebin.com/fq2dmfyn)
 
-#### JSFuck Deobfuscation
+### JSFuck Deobfuscation
 
 Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [here](https://pastebin.com/55t5TeQn)
 We can deobfuscate it as such:
