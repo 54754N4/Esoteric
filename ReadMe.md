@@ -22,7 +22,7 @@ CharStream stream = CharStream.of(stringVariable);
 // From a File
 CharStream stream = CharStream.of(new File(filePath));
 ```
-
+
 #### Brainfuck Transpilation
 
 After creating the `CharStream`, you can then transpile into any target (in this example `Java`).
@@ -45,14 +45,13 @@ AST optimised = optimiser.visit(parser.parse());
 JavaTranspiler transpiler = new JavaTranspiler();
 System.out.println(transpiler.transpile(optimised));
 ```
-Which prints the following [Java code](https://pastebin.com/fq2dmfyn)
 
+Which prints the following [Java code](https://pastebin.com/fq2dmfyn)
 
 #### JSFuck Deobfuscation
 
 Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [here](https://pastebin.com/55t5TeQn)
-
-Then we can deobfuscate it as such:
+We can deobfuscate it as such:
 
 ```java
 Lexer<JSFuck> lexer = new Lexer<>(stream, JSFuck.class);
@@ -63,8 +62,9 @@ JSFuckDeobfuscator transpiler = new JSFuckDeobfuscator();
 System.out.println(transpiler.transpile(ast));
 ```
 Which prints:
-```jss[].flat.constructor("return eval")()("alert(\"Hello, world!\")")
-```
+```js
+[].flat.constructor("return eval")()("alert(\"Hello, world!\")")
+```
 
 ---
 
@@ -77,6 +77,6 @@ Which prints:
 ---
 
 # Reference
-[^1]: https://esolangs.org/wiki/Brainfuc
+[^1]: https://esolangs.org/wiki/Brainfuck
 [^2]: https://esolangs.org/wiki/Ook
 [^3]: https://esolangs.org/wiki/JSFuck
