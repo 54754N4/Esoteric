@@ -8,13 +8,13 @@ Transpiles esoteric languages to more verbose languages as described in the foll
 |**Ook!** [^2]          | ✅  | 😂  | ✅  | ✅   | ✅    |❌  |
 |**JSFuck** [^3]       | ❌  | ❌  | ❌  | ❌   | ❌    | ✅  |
 
-*Note 1*: `JSFuck` can only be deobfuscated since there's no point converting JS to different languages
+*Note 1*: `JSFuck` can only be deobfuscated since there's no point converting JS to different languages.
 
-*Note 2*: `Brainfuck` and `Ook!` can't be transpiled into `JS` because of IO commands
+*Note 2*: `Brainfuck` and `Ook!` can't be transpiled into `JS` because of IO commands.
 
 ---
 
-## Transpilation Example
+## Automatic Transpilation
 
 ### Loading data
 
@@ -26,6 +26,22 @@ CharStream stream = CharStream.of(stringVariable);
 // From a File
 CharStream stream = CharStream.of(new File(filePath));
 ```
+
+*Note*: In the subsequent codeblocks, every reference to `stream` refers to an instance of `CharStream`.
+
+### Transpiling
+
+The `Esoteric` interface defines two enum classes called `Input` and `Output` which relate to the input languages that can be interpreted and the output languages that can be transpiled into. The following is an example of transpiling `Brainfuck` into `Python`:
+
+```java
+StringFormatBuilder result = Esoteric.transpile(stream, Input.Brainfuck, Output.Python);
+```
+
+*Note*: A transpilation result is always stored inside a `StringFormatBuilder` which is an extended version of `StringBuilder`.
+
+---
+
+## Manual Transpilation Example
 
 ### Brainfuck Transpilation
 
@@ -41,7 +57,6 @@ Let's suppose we have the following "hello world" `Brainfuck` code:
 You can then transpile as such:
 
 ```java
-CharStream stream = CharStream.of(code);
 Lexer<Brainfuck> lexer = new Lexer<>(stream, Brainfuck.class);
 BFParser parser = new BFParser(lexer);
 BFOptimiser optimiser = new BFOptimiser();
@@ -58,7 +73,6 @@ Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [
 We can deobfuscate it as such:
 
 ```java
-CharStream stream = CharStream.of(code);
 Lexer<JSFuck> lexer = new Lexer<>(stream, JSFuck.class);
 JSFuckParser parser = new JSFuckParser(lexer);
 JSFuckOptimiser optimiser = new JSFuckOptimiser();
