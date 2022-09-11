@@ -4,8 +4,8 @@ Transpiles esoteric languages to more verbose languages as described in the foll
 
 |**Transpiles to**| Brainfuck  | Ook! | C   | Java | Python | JS  |
 |:---------------:|:---:|:---:|:---:|:----:|:------:|:---:|
-|**Brainfuck** [^1]| 😂  | ✅  | ✅  | ✅   | ✅    | ✅  |
-|**Ook!** [^2]          | ✅  | 😂  | ✅  | ✅   | ✅    | ✅  |
+|**Brainfuck** [^1]| 😂  | ✅  | ✅  | ✅   | ✅    | ❌ |
+|**Ook!** [^2]          | ✅  | 😂  | ✅  | ✅   | ✅    |❌  |
 |**JSFuck** [^3]       | ❌  | ❌  | ❌  | ❌   | ❌    | ✅  |
 
 ---
