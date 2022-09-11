@@ -54,6 +54,7 @@ Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [
 We can deobfuscate it as such:
 
 ```java
+CharStream stream = CharStream.of(code);
 Lexer<JSFuck> lexer = new Lexer<>(stream, JSFuck.class);
 JSFuckParser parser = new JSFuckParser(lexer);
 JSFuckOptimiser optimiser = new JSFuckOptimiser();
