@@ -1,6 +1,6 @@
 # Esoteric
 
-Transpiles esoteric languages to more verbose languages as described in the following table (for `JSFuck` it simply deobfuscates it since there's no point converting JS to different languages):
+Transpiles esoteric languages to more verbose languages as described in the following table:
 
 |**Transpiles to**| Brainfuck  | Ook! | C   | Java | Python | JS  |
 |:---------------:|:---:|:---:|:---:|:----:|:------:|:---:|
@@ -8,6 +8,8 @@ Transpiles esoteric languages to more verbose languages as described in the foll
 |**Ook!** [^2]          | ✅  | 😂  | ✅  | ✅   | ✅    |❌  |
 |**JSFuck** [^3]       | ❌  | ❌  | ❌  | ❌   | ❌    | ✅  |
 
+*Note 1*: `JSFuck` can only be deobfuscated since there's no point converting JS to different languages
+*Note 2*: `Brainfuck` and `Ook!` can't be transpiled into `JS` because of IO commands
 ---
 
 ## Transpilation Example
