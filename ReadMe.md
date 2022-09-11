@@ -54,7 +54,7 @@ Let's suppose we have the following "hello world" `Brainfuck` code:
 ]<+.
 ```
 
-You can then transpile as such:
+You can then proceed to transpile it as such:
 
 ```java
 Lexer<Brainfuck> lexer = new Lexer<>(stream, Brainfuck.class);
@@ -69,7 +69,7 @@ Which prints the following [Java code](https://pastebin.com/fq2dmfyn)
 
 ### JSFuck Deobfuscation
 
-Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [here](https://pastebin.com/55t5TeQn)
+Let's suppose we want to deobfuscate the following "Hello World" `JSFuck` code [here](https://pastebin.com/55t5TeQn).
 We can deobfuscate it as such:
 
 ```java
