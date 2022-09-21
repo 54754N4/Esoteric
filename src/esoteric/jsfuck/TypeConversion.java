@@ -10,6 +10,7 @@ import esoteric.jsfuck.ast.Num;
 import esoteric.jsfuck.ast.Str;
 import esoteric.jsfuck.ast.Undefined;
 import model.AST;
+import model.StringFormatBuilder;
 
 /* - JS conversion table:	https://www.w3schools.com/js/js_type_conversion.asp
  * - Coercions grid:		https://getify.github.io/coercions-grid/
@@ -59,8 +60,10 @@ public interface TypeConversion {
 			if (str.equals(""))
 				return new Num(0);
 			try {
-				return new Num(Integer.parseInt(str));
+				return new Num(Double.parseDouble(str));
 			} catch (Exception e) {
+				if (isExponential(str))
+					return fromExponential(str);
 				return new NaN();
 			}
 		} else if (Array.class.isInstance(ast)) {
@@ -74,11 +77,8 @@ public interface TypeConversion {
 					boolean isInteger = Num.isInteger(str.getValue());
 					if (Num.isDouble(str.getValue()) || isInteger)
 						return new Num(str.getValue(), isInteger);
-				} else if (Num.class.isInstance(node)) {
-					Num n = Num.class.cast(node);
-					if (n.isDouble() || n.isInteger())
-						return new Num(n.getValue(), n.isInteger());
-				}
+				} else if (Num.class.isInstance(node))
+					return Num.class.cast(node);
 			}
 			return new NaN();
 		} else if (Null.class.isInstance(ast))
@@ -101,9 +101,12 @@ public interface TypeConversion {
 			return new Str(Infinity.class.cast(ast).getValue());
 		else if (Array.class.isInstance(ast)) {
 			Array array = Array.class.cast(ast);
-			StringBuilder sb = new StringBuilder();
+			if (array.size() == 0)
+				return new Str("");
+			StringFormatBuilder sb = new StringFormatBuilder();
 			for (AST element : array) 
-				sb.append(toString(element).getValue());
+				sb.append(toString(element).getValue() + ",");
+			sb.deleteLastChar(',');
 			return new Str(sb.toString());
 		} else if (Null.class.isInstance(ast))
 			return new Str("null");
@@ -120,5 +123,29 @@ public interface TypeConversion {
 			return new Str("[object Object]");
 		else
 			return error("Cannot convert to string type: %s", ast);
+	}
+	
+	private boolean isExponential(String string) {
+		char c;
+		for (int i=0; i<string.length(); i++) {
+			c = string.charAt(i);
+			if (!Character.isDigit(c) && c != 'e' && c != 'E')
+				return false;
+		}
+		return true;
+	}
+	
+	private Num fromExponential(String string) {
+		String splitter = string.contains("e") ? "e" : "E";
+		String[] split = string.split(splitter);
+		double value = Double.parseDouble(split[0]);
+		int exponent = Integer.parseInt(split[1]);
+		if (exponent > 308)	// replicates JS
+			return new Infinity(false);
+		else if (exponent < -323)
+			return new Num(0);
+		if (Num.isInteger(value))
+			return new Num(String.format("%de%d", (int) value, exponent), true);
+		return new Num(String.format("%fe%d", value, exponent), false);
 	}
 }

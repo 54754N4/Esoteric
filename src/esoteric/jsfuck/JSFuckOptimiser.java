@@ -3,20 +3,22 @@ package esoteric.jsfuck;
 import java.util.Arrays;
 import java.util.List;
 
+import esoteric.jsfuck.optimiser.JSNodeConverter;
 import esoteric.jsfuck.optimiser.JSPrimitivesMerger;
 import model.Optimiser;
 import model.OptimiserImpl;
 
 public class JSFuckOptimiser extends OptimiserImpl {
 	public static final int 
-		PM = 1 << 0;	// primitives merger
-	public static final int OPTIMISATIONS = 1;
+		PM = 1 << 0,	// primitives merger
+		NC = 1 << 1;	// nodes converter
 	public static final List<Class<? extends Optimiser>> OPTIMISERS = Arrays.asList(
-			JSPrimitivesMerger.class
+			JSPrimitivesMerger.class,
+			JSNodeConverter.class
 	);
 	
 	public JSFuckOptimiser() {
-		this(PM);
+		this(PM | NC);
 	}
 	
 	public JSFuckOptimiser(int optimisations) {

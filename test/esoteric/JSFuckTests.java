@@ -7,9 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.jupiter.api.Test;
 
+import esoteric.jsfuck.JSFuckCompiler;
 import esoteric.jsfuck.JSFuckOptimiser;
 import esoteric.jsfuck.JSFuckParser;
 import esoteric.jsfuck.ast.Array;
@@ -257,6 +260,49 @@ class JSFuckTests {
 			JSFuckParser parser = new JSFuckParser(lexer);
 			ast = optimiser.visit(parser.parse());
 			assertEquals(expected[i], transpiler.transpile(ast).toString());
+		}
+	}
+	
+	@Test
+	void generate_and_test_automatically() {
+		JSFuckOptimiser optimiser = new JSFuckOptimiser();
+		JSFuckDeobfuscator transpiler = new JSFuckDeobfuscator();
+		AST ast; String input, result;
+		Map<String, String> table = JSFuckCompiler.SIMPLE;
+		for (Entry<String, String> entry : table.entrySet()) {
+			input = entry.getValue();
+			CharStream stream = CharStream.of(input);
+			Lexer<JSFuck> lexer = new Lexer<>(stream, JSFuck.class);
+			JSFuckParser parser = new JSFuckParser(lexer);
+			ast = optimiser.visit(parser.parse());
+			result = transpiler.transpile(ast).toString();
+			assertEquals(entry.getKey(), result, "Input = " + input + " Expected = " + entry.getKey());
+		}
+		table = JSFuckCompiler.MAPPING;
+		for (Entry<String, String> entry : table.entrySet()) {
+			input = entry.getValue();
+			if (input == null)
+				continue;
+			CharStream stream = CharStream.of(input);
+			Lexer<JSFuck> lexer = new Lexer<>(stream, JSFuck.class);
+			JSFuckParser parser = new JSFuckParser(lexer);
+			ast = optimiser.visit(parser.parse());
+			result = transpiler.transpile(ast).toString();
+			if (Str.class.isInstance(ast)) {						// since JS console wouldn't check quotes in the string
+				result = result.substring(1, result.length() - 1);	// remove quotes
+				if (!Str.class.cast(ast).getValue().equals("\\"))
+					result = result.replace("\\", "");				// remove backslash
+			}
+			/* JSFuck returns an array of a single digit to represent digits
+			 * so in this case it's correct */
+			if (result.matches("\\[\\d\\]") && entry.getKey().matches("\\d")) 
+				assertEquals(entry.getKey(), result.substring(1, result.length() - 1));
+			else 
+				assertEquals(entry.getKey(), result, "\nInput = " + input 
+					+ "\nExpected = " + entry.getKey() 
+					+ "\nAST = " + result 
+					+ "\nASTCLASS = "+result.getClass() + "\n");
+			
 		}
 	}
 }

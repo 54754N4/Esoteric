@@ -28,14 +28,13 @@ public abstract class OptimiserImpl implements Optimiser {
 	
 	@Override
 	public AST visit(AST ast) {
-		AST temp;
+		AST temp = ast;
 		int hashcode;
 		do {
-			hashcode = ast.hashCode();
-			temp = ast;
+			hashcode = temp.hashCode();
 			for (Optimiser optimiser : optimisers)
 				temp = optimiser.apply(temp);
-		} while (multiplePasses && ast.hashCode() != hashcode);
+		} while (multiplePasses && temp.hashCode() != hashcode);
 		return temp;
 	}
 }

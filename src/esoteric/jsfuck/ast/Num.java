@@ -12,20 +12,29 @@ public class Num implements JSObject {
 	private boolean integer;
 	
 	public Num(String value, boolean integer) {
-		if (value.contains("e")) {
-			value = value.replace("e", "E");
-			if (value.contains("E+"))
-				value = value.replace("E+", "E");
-		}
 		this.value = value;
 		this.integer = integer;
+		fix();
 	}
 	
 	public Num(double num) {
-		value = String.valueOf(num);
-		integer = isInteger(num);
-		if (integer && value.endsWith(".0"))
-			value = value.substring(0, value.length() - 2);
+		this(String.valueOf(num), isInteger(num));
+	}
+	
+	private void fix() {
+		if (!value.equals("NaN") && !value.endsWith("Infinity")) {
+			double d = Double.parseDouble(value);
+			String result = String.valueOf(d);
+			value = result.replace("E", "e");
+			String[] split = value.split("e");
+			if (split[0].endsWith(".0")) {
+				value = split[0].substring(0, split[0].length() - 2);
+				if (split.length == 2)
+					value += "e" + split[1];
+			}
+			if (!value.contains("e-"))
+				value = value.replace("e", "e+");
+		}
 	}
 	
 	public boolean isIndexable() {
@@ -33,11 +42,11 @@ public class Num implements JSObject {
 	}
 	
 	public boolean isExponential() {
-		return value.contains("E");
+		return value.contains("e");
 	}
 	
 	public int getIntValue() {
-		if (value.contains("E"))
+		if (value.contains("e"))
 			return new BigDecimal(value).intValue();
 		return Integer.valueOf(value);
 	}

@@ -1,10 +1,12 @@
 package run;
+
 import esoteric.brainfuck.BFOptimiser;
 import esoteric.brainfuck.BFParser;
 import esoteric.brainfuck.transpiler.CTranspiler;
 import esoteric.brainfuck.transpiler.JavaTranspiler;
 import esoteric.brainfuck.transpiler.OokTranspiler;
 import esoteric.brainfuck.transpiler.PythonTranspiler;
+import esoteric.jsfuck.JSFuckCompiler;
 import esoteric.jsfuck.JSFuckOptimiser;
 import esoteric.jsfuck.JSFuckParser;
 import esoteric.jsfuck.transpiler.JSFuckDeobfuscator;
@@ -105,6 +107,15 @@ public interface Esoteric {
 				return new JSFuckDeobfuscator();
 			default: // unreachable code
 				return error("Unrecognized output target " + out);
+		}
+	}
+	
+	static String compile(String input, Input out) {
+		switch (out) {
+			case JSFuck:
+				return JSFuckCompiler.encode(input);
+			default:
+				return error("No compiler for language: " + out);
 		}
 	}
 	

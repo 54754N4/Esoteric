@@ -14,6 +14,10 @@ import model.AST;
 public class Array extends ArrayList<AST> implements JSObject {
 	private static final long serialVersionUID = 8889949572315829436L;
 
+	public Array(AST...asts) {
+		super(Arrays.asList(asts));
+	} 
+	
 	@Override
 	public int hashCode() {
 		return super.hashCode();

@@ -128,6 +128,12 @@ public class StringFormatBuilder implements Serializable, Comparable<StringBuild
     	return charAt(length - 1);
     }
     
+    public StringFormatBuilder deleteLastChar(char thisChar) {
+    	if (charAt(length() - 1) == thisChar)
+    		deleteLastChars(1);
+    	return this;
+    }
+    
     public StringFormatBuilder deleteLastChar() {
     	return deleteLastChars(1);
     }

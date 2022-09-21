@@ -35,18 +35,24 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 		Addition addition = new Addition();
 		// Addition always has a minimum of 2 elements
 		AST left = visit(ast.get(0)), right;
+		boolean added = false;
 		for (int i=1; i < ast.size(); i++) {
 			right = visit(ast.get(i));
-			if (isAddable(left) && isAddable(right))
+			if (isAddable(left) && isAddable(right)) {
 				left = additionMerge(left, right);
-			else {	// can't be merged
+				added = false;
+			} else {	// can't be merged
 				addition.add(left);
 				left = right;
+				if (i+1 < ast.size())	// if it's last element it wouldn't have been added
+					added = true;
 			}
 		}
-		// if all elements merged into 1 and weren't added to addition AST
-		if (addition.size() == 0)
-			return left;
+		if (!added) {
+			if (addition.size() == 0)
+				return left;
+			addition.add(left);
+		}
 		// if everything merged to a single element, remove useless addition node
 		if (addition.size() == 1)
 			return addition.get(0);
@@ -111,6 +117,17 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 					return new FunctionDef(name, num, i.getValue());
 				}
 			}
+		} else if (Bool.class.isInstance(left)) {
+			Bool bool = Bool.class.cast(left);
+			if (Str.class.isInstance(index)) {
+				Str i = Str.class.cast(index);
+				if (JSMethods.BOOLEANS.contains(i.getValue())) {
+					String name = i.getValue();
+					if (name.equals("constructor"))
+						name = "Boolean";
+					return new FunctionDef(name, bool, i.getValue());
+				}
+			}
 		} else if (FunctionDef.class.isInstance(left)) {
 			FunctionDef def = FunctionDef.class.cast(left);
 			if (Str.class.isInstance(index)) {
@@ -124,8 +141,17 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 			} 
 		} else if (Array.EntryIterator.class.isInstance(left) 
 				|| Array.KeysIterator.class.isInstance(left)
-				|| Array.ValuesIterator.class.isInstance(left))
+				|| Array.ValuesIterator.class.isInstance(left)) {
+			if (Str.class.isInstance(index)) {
+				Str str = Str.class.cast(index);
+				String name = str.getValue();
+				if (name.equals("constructor")) {
+					FunctionDef parent = new FunctionDef("entries", new Array(), "entries");
+					return new FunctionDef("Object", parent, str.getValue());
+				}
+			}
 			return new Undefined();
+		}
 		return new ArrayAccess(left, index);
 	}
 	
@@ -149,12 +175,15 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 				paramsClass[i] = AST.class;
 			if (function.equals("toString"))	// since java prevents overriding return type of toString
 				function = "toStringJS";
+			String param = "";
 			try {
 				// Assumption: parameter for function/regexp constructors should almost always be a string
+				if ((function.equals("Function") || function.equals("RegExp")) && params.size() == 1)
+					param = Str.class.cast(params.get(0)).getValue();
 				if (function.equals("Function"))
-					return JSMethods.executeFunctionConstructor(Str.class.cast(params.get(0)).getValue(), call);
+					return JSMethods.executeFunctionConstructor(param, call);
 				else if (function.equals("RegExp"))
-					return JSMethods.executeRegexpConstructor(Str.class.cast(params.get(0)).getValue(), call);
+					return JSMethods.executeRegexpConstructor(param, call);
 				else {
 					Method method = target.getDeclaredMethod(function, paramsClass);
 					return (AST) method.invoke(def.getParent(), params.toArray());
@@ -163,7 +192,9 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 				// If it can't be executed then return FunctionCall as is
 				return call;
 			}
-		} else if (!FunctionCall.class.isInstance(funcName) && params.size() == 0)
+		} else if (!FunctionCall.class.isInstance(funcName) &&
+				!ArrayAccess.class.isInstance(funcName) &&
+				params.size() == 0)
 			return funcName;
 		return call;
 	}
@@ -182,13 +213,23 @@ public class JSPrimitivesMerger implements JSFuckVisitor<AST>, TypeConversion, O
 		if (Str.class.isInstance(left) || Str.class.isInstance(right))
 			return new Str(toString(left).getValue() + toString(right).getValue());
 		// arrays and functions force string type coercion
-		else if ((Num.class.isInstance(left) && !Array.class.isInstance(right) && !FunctionDef.class.isInstance(right)) ||
-				(Num.class.isInstance(right) && !Array.class.isInstance(left) && !FunctionDef.class.isInstance(left)) ||
-				(Bool.class.isInstance(left) && Bool.class.isInstance(right)))
+		else if ((Bool.class.isInstance(left) && Bool.class.isInstance(right)) || 
+				isAndIsNot(left, right, Num.class, Array.class, FunctionDef.class, Array.EntryIterator.class, Array.ValuesIterator.class, Array.KeysIterator.class) ||
+				isAndIsNot(right, left, Num.class, Array.class, FunctionDef.class, Array.EntryIterator.class, Array.ValuesIterator.class, Array.KeysIterator.class))
 			return new Num(toNumber(left).getDoubleValue() + toNumber(right).getDoubleValue());
 		else // not numbers/strings/bool, so just coerce both into string + concatenate
 			return new Str(toString(left).getValue() + toString(right).getValue());
 	}
+	
+	@SafeVarargs
+	private boolean isAndIsNot(AST left, AST right, Class<? extends AST> leftCls, Class<? extends AST>...notRightCls) {
+		boolean test = leftCls.isInstance(left);
+		if (!test)
+			return test;
+		for (Class<? extends AST> rightCls : notRightCls) // right shouldn't be those classes
+			test = test && !rightCls.isInstance(right);
+		return test;
+	} 
 	
 	private boolean isAddable(AST ast) {
 		return is(ast, 

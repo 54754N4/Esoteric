@@ -62,6 +62,10 @@ public interface JSMethods {
 	static final List<String> NUMBERS = Arrays.asList(("__defineGetter__ __defineSetter__ __lookupGetter__ "
 			+ "__lookupSetter__ __proto__ constructor hasOwnProperty isPrototypeOf propertyIsEnumerable "
 			+ "toExponential toFixed toLocaleString toPrecision toString valueOf").split(" "));
+	// console.log(...getAllMethods(true).sort())
+	static final List<String> BOOLEANS = Arrays.asList(("__defineGetter__ __defineSetter__ __lookupGetter__ "
+			+ "__lookupSetter__ __proto__ constructor hasOwnProperty isPrototypeOf propertyIsEnumerable "
+			+ "toLocaleString toString valueOf").split(" "));
 	
 	static final String ANONYMOUS_FUNC_FORMAT = "(function() { %s; })()";
 	static final String REGEXP_CONSTRUCTOR = "/a/.constructor(\"%s\")";

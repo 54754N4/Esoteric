@@ -1,7 +1,5 @@
 package esoteric.jsfuck.ast;
 
-import java.util.Arrays;
-
 import model.AST;
 
 public class Str implements JSObject {
@@ -125,7 +123,9 @@ public class Str implements JSObject {
 	}
 	
 	public Str fontcolor(AST v) {
-		return new Str(String.format("<font color=\"%s\">%s</font>", v == null ? "undefined" : v.toString(), value));
+		String val = v == null ? "undefined" : v.toString();
+		val = val.replaceAll("\"", "&quot;");	// JS attributes replace " to &quot; for some reason
+		return new Str(String.format("<font color=\"%s\">%s</font>", val, value));
 	}
 	
 	public Str fontcolor() {
@@ -133,7 +133,9 @@ public class Str implements JSObject {
 	}
 	
 	public Str fontsize(AST v) {
-		return new Str(String.format("<font size=\"%s\">%s</font>", v == null ? "undefined" : v.toString(), value));
+		String val = v == null ? "undefined" : v.toString();
+		val = val.replaceAll("\"", "&quot;");
+		return new Str(String.format("<font size=\"%s\">%s</font>", val, value));
 	}
 	
 	public Str fontsize() {
@@ -175,7 +177,9 @@ public class Str implements JSObject {
 	}
 	
 	public Str link(AST url) {
-		return new Str(String.format("<a href=\"%s\">%s</a>", toString(url), value));
+		Str str = toString(url);
+		String val = str.getValue().replaceAll("\"", "&quot;");
+		return new Str(String.format("<a href=\"%s\">%s</a>", val, value));
 	}
 	
 	public Str padEnd(AST length, AST p) {
@@ -260,6 +264,10 @@ public class Str implements JSObject {
 		return new Str(value.substring(is, ie));
 	}
 	
+	public Str slice(AST start) {
+		return slice(start, length);
+	}
+	
 	public Str small() {
 		return new Str(String.format("<small>%s</small>", value));
 	}
@@ -277,11 +285,6 @@ public class Str implements JSObject {
 	
 	public Array split(AST sep) {
 		return split(sep, new Num(Integer.MAX_VALUE));
-	}
-	
-	public static void main(String[] args) {
-		Str s = new Str("alert164t50t42t110ellt157t54t40t167t157rldt41t42t51");
-		System.out.println(Arrays.toString(s.split(new Str("t")).toArray()));
 	}
 	
 	public Array split() {
