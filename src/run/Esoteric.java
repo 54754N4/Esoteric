@@ -1,5 +1,6 @@
 package run;
 
+import esoteric.brainfuck.BFCompiler;
 import esoteric.brainfuck.BFOptimiser;
 import esoteric.brainfuck.BFParser;
 import esoteric.brainfuck.transpiler.CTranspiler;
@@ -10,6 +11,7 @@ import esoteric.jsfuck.JSFuckCompiler;
 import esoteric.jsfuck.JSFuckOptimiser;
 import esoteric.jsfuck.JSFuckParser;
 import esoteric.jsfuck.transpiler.JSFuckDeobfuscator;
+import esoteric.ook.OokCompiler;
 import esoteric.ook.OokParser;
 import esoteric.ook.transpiler.BFTranspiler;
 import model.AST;
@@ -71,6 +73,22 @@ public interface Esoteric {
 		}
 	}
 	
+	/**
+	 * Converts text into target language specified
+	 * @param input - text to convert
+	 * @param out - target language to convert into
+	 * @return converted text
+	 */
+	static String compile(String input, Input out) {
+		switch (out) {
+			case Brainfuck: return BFCompiler.encode(input);
+			case Ook: return OokCompiler.encode(input);
+			case JSFuck: return JSFuckCompiler.encode(input);
+			default:
+				return error("No compiler for language: " + out);
+		}
+	}
+	
 	/* Convenience methods */
 	
 	static Transpiler getTranspiler(Input in, Output out) {
@@ -107,15 +125,6 @@ public interface Esoteric {
 				return new JSFuckDeobfuscator();
 			default: // unreachable code
 				return error("Unrecognized output target " + out);
-		}
-	}
-	
-	static String compile(String input, Input out) {
-		switch (out) {
-			case JSFuck:
-				return JSFuckCompiler.encode(input);
-			default:
-				return error("No compiler for language: " + out);
 		}
 	}
 	
