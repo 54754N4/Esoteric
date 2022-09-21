@@ -24,6 +24,10 @@ public class JSNodeConverter implements JSFuckVisitor<AST>, Optimiser {
 	private static final int percentage, comma, c, d, dateResult, undefinedString;
 	
 	static {
+		/* Stores hashcodes of recurrent AST nodes that we cannot evaluate
+		 * without a full blown JS interpreter. Then replaces them with the
+		 * appropriate result/AST
+		 */
 		percentage = new ArrayAccess(
 				new FunctionCall(
 						new FunctionCall(
@@ -98,22 +102,24 @@ public class JSNodeConverter implements JSFuckVisitor<AST>, Optimiser {
 	
 	@Override
 	public AST visit(ArrayAccess ast) {
-		if (ast.hashCode() == percentage)
+		int hc = ast.hashCode();
+		if (hc == percentage)
 			return new Str("%");
-		else if (ast.hashCode() == c)
+		else if (hc == c)
 			return new Str("C");
 		return new ArrayAccess(visit(ast.getArray()), visit(ast.getIndex()));
 	}
 	
 	@Override
 	public AST visit(FunctionCall ast) {
-		if (ast.hashCode() == comma)
+		int hc = ast.hashCode();
+		if (hc == comma)
 			return new Str(",");
-		else if (ast.hashCode() == d)
+		else if (hc == d)
 			return new Str("D");
-		else if (ast.hashCode() == dateResult)
+		else if (hc == dateResult)
 			return JSMethods.execute("new Date().toString()", ast);
-		else if (ast.hashCode() == undefinedString)
+		else if (hc == undefinedString)
 			return new Str("[object Undefined]");
 		Array array = ast.getParams().stream()
 				.map(this::visit)

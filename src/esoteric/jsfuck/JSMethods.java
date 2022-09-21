@@ -4,8 +4,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.caoccao.javet.exceptions.JavetException;
-import com.caoccao.javet.interop.V8Host;
+import com.caoccao.javet.interfaces.IJavetLogger;
 import com.caoccao.javet.interop.V8Runtime;
+import com.caoccao.javet.interop.engine.IJavetEngine;
+import com.caoccao.javet.interop.engine.JavetEngineConfig;
+import com.caoccao.javet.interop.engine.JavetEnginePool;
 import com.caoccao.javet.values.V8Value;
 import com.caoccao.javet.values.primitive.V8ValueBoolean;
 import com.caoccao.javet.values.primitive.V8ValueDouble;
@@ -70,8 +73,20 @@ public interface JSMethods {
 	static final String ANONYMOUS_FUNC_FORMAT = "(function() { %s; })()";
 	static final String REGEXP_CONSTRUCTOR = "/a/.constructor(\"%s\")";
 	
+	/* Default logger ignores everything */
+	static IJavetLogger LOGGER = new IJavetLogger() {
+		@Override public void debug(String message) {}
+		@Override public void error(String message) {}
+		@Override public void error(String message, Throwable cause) {}
+		@Override public void info(String message) {}
+		@Override public void warn(String message) {}
+	};
+	static JavetEngineConfig JAVET_ENGINE_CONFIG = new JavetEngineConfig().setJavetLogger(LOGGER);
+	static JavetEnginePool<V8Runtime> JAVET_ENGINE_POOL = new JavetEnginePool<>(JAVET_ENGINE_CONFIG);
+	
 	static AST execute(String code, FunctionCall call) {
-		try (V8Runtime v8 = V8Host.getNodeInstance().createV8Runtime()) {
+		try (IJavetEngine<V8Runtime> engine = JAVET_ENGINE_POOL.getEngine()) {
+			V8Runtime v8 = engine.getV8Runtime();
 			return convert(v8.getExecutor(code).execute(), call);
 		} catch (JavetException e) {
 			throw new RuntimeException("Error running js code : "+code);
