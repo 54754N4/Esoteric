@@ -121,6 +121,11 @@ public class StringFormatBuilder implements Serializable, Comparable<StringBuild
 	
     /* Extra convenience methods */
     
+    public boolean peek(String str) {
+		return str.length() <= length() 
+				&& subSequence(0, str.length()).equals(str);
+	}
+    
     public char lastChar() {
     	int length = length();
     	if (length == 0)
@@ -128,14 +133,18 @@ public class StringFormatBuilder implements Serializable, Comparable<StringBuild
     	return charAt(length - 1);
     }
     
-    public StringFormatBuilder deleteLastChar(char thisChar) {
-    	if (charAt(length() - 1) == thisChar)
-    		deleteLastChars(1);
-    	return this;
+    public StringFormatBuilder deleteFirstChars(int count) {
+    	return delete(0, count);
     }
     
-    public StringFormatBuilder deleteLastChar() {
-    	return deleteLastChars(1);
+    public StringFormatBuilder deleteFirstChar() {
+    	return deleteFirstChars(1);
+    }
+    
+    public StringFormatBuilder deleteFirstChar(char thisChar) {
+    	if (charAt(0) == thisChar)
+    		deleteFirstChar();
+    	return this;
     }
     
     public StringFormatBuilder deleteLastChars(int count) {
@@ -143,6 +152,16 @@ public class StringFormatBuilder implements Serializable, Comparable<StringBuild
     	if (start < 0)
     		start = 0;
     	return delete(start, length());
+    }
+  
+    public StringFormatBuilder deleteLastChar() {
+    	return deleteLastChars(1);
+    }
+    
+    public StringFormatBuilder deleteLastChar(char thisChar) {
+    	if (charAt(length() - 1) == thisChar)
+    		deleteLastChar();
+    	return this;
     }
     
 	/* StringBuilder methods */
@@ -338,4 +357,10 @@ public class StringFormatBuilder implements Serializable, Comparable<StringBuild
 	public String toString() {
     	return sb.toString();
     }
+	
+	public static void main(String[] args) {
+		StringFormatBuilder sb = new StringFormatBuilder("Hello, World!");
+		System.out.println(sb.deleteFirstChars(1));
+		
+	}
 }

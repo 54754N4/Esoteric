@@ -87,7 +87,7 @@ Which prints:
 
 ---
 
-## Transpiler Classes Location
+### Transpiler Classes Location
 
 - `Brainfuck` transpilers can be found in `esoteric.brainfuck.transpiler`
 - `Ook!` transpilers can be found in `esoteric.ook.transpiler` (since `Ook!` uses the same Abstract Syntax Tree as `Brainfuck` the same transpilers can be used)
@@ -95,7 +95,67 @@ Which prints:
 
 ---
 
+## Trivial Brainfuck Substitutions [^4]
+
+There's an infinite number of BF substitutions, which can be decoded using a correctly defined `BFSubstitution` class.
+
+### (Encod/Decod)ing
+
+Let's encode and decode the following `Hello, World!` BF program into `[Pikalang](https://esolangs.org/wiki/Pikalang)` (pikachu language):
+
+```bf
+>--->--->--->++>+>--->->--->->>-->->->->->+++>-->->--->>->+>+>--->->+++>--->+++>-->->>-->->>-->->>--->->->>-->+[<+++[-<+++++++>]<+++[-<+++++++>]<+++[.>]<]
+```
+
+We can convert it using any substitution as such:
+
+```java
+BFSubstitution substitution = BFSubstitutions.PIKALANG;
+String encoded = BFSubstitutions.encode(bfcode, substitution);
+String decoded = BFSubstitutions.decode(encoded, substitution);
+```
+
+The `encoded` string would contain:
+
+```
+pipi ka ka ka pipi ka ka ka pipi ka ka ka pipi pi pi pipi pi pipi ka ka ka pipi ka pipi ka ka ka pipi ka pipi pipi ka ka pipi ka pipi ka pipi ka pipi ka pipi pi pi pi pipi ka ka pipi ka pipi ka ka ka pipi pipi ka pipi pi pipi pi pipi ka ka ka pipi ka pipi pi pi pi pipi ka ka ka pipi pi pi pi pipi ka ka pipi ka pipi pipi ka ka pipi ka pipi pipi ka ka pipi ka pipi pipi ka ka ka pipi ka pipi ka pipi pipi ka ka pipi pi pika pichu pi pi pi pika ka pichu pi pi pi pi pi pi pi pipi chu pichu pi pi pi pika ka pichu pi pi pi pi pi pi pi pipi chu pichu pi pi pi pika pikachu pipi chu pichu chu
+```
+
+And the `decoded` string would contain the original BF code.
+
+### Defining Custom Substitutions
+
+To take the `Pikalang` substitution from our previous example, it can be easily defined as a `BFSubstitution` quickly as such:
+
+```java
+BFSubstitution PIKALANG = new BFSubstitution.Builder()
+	.set("pipi", "pichu", "pi", "ka", "pikachu", "pikapi", "pika", "chu") // in this order respectively ><+-.,[]
+	.spaced()
+	.build();
+```
+
+Or in a more verbose manner:
+
+```java
+BFSubstitution PIKALANG = new BFSubstitution.Builder()
+	.setPointerRight("pipi")
+	.setPointerLeft("pichu")
+	.setIncrement("pi")
+	.setDecrement("ka")
+	.setOutput("pikachu")
+	.setInput("pikapi")
+	.setLoopStart("pika")
+	.setLoopEnd("chu")
+	.spaced()
+	.build();
+```
+
+Note: `Pikalang` requires spacing between opcodes (defined by calling `BFSubstitution.Builder::spaced`) since many tokens can be matched in the current stream. Other substitutions might not require spacing so the call to `spaced` can be omitted.
+
+---
+
 # Reference
 [^1]: https://esolangs.org/wiki/Brainfuck
 [^2]: https://esolangs.org/wiki/Ook
 [^3]: https://esolangs.org/wiki/JSFuck
+[^4]: https://esolangs.org/wiki/Trivial_brainfuck_substitution
