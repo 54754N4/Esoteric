@@ -101,7 +101,7 @@ There's an infinite number of BF substitutions, which can be decoded using a cor
 
 ### (Encod/Decod)ing
 
-Let's encode and decode the following `Hello, World!` BF program into `[Pikalang](https://esolangs.org/wiki/Pikalang)` (pikachu language):
+Let's encode and decode the following `Hello, World!` BF program into [`Pikalang`](https://esolangs.org/wiki/Pikalang) (pikachu language):
 
 ```bf
 >--->--->--->++>+>--->->--->->>-->->->->->+++>-->->--->>->+>+>--->->+++>--->+++>-->->>-->->>-->->>--->->->>-->+[<+++[-<+++++++>]<+++[-<+++++++>]<+++[.>]<]
