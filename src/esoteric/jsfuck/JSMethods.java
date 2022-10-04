@@ -9,6 +9,9 @@ import com.caoccao.javet.interop.V8Runtime;
 import com.caoccao.javet.interop.engine.IJavetEngine;
 import com.caoccao.javet.interop.engine.JavetEngineConfig;
 import com.caoccao.javet.interop.engine.JavetEnginePool;
+import com.caoccao.javet.interop.options.NodeRuntimeOptions;
+import com.caoccao.javet.interop.options.V8Flags;
+import com.caoccao.javet.interop.options.V8RuntimeOptions;
 import com.caoccao.javet.values.V8Value;
 import com.caoccao.javet.values.primitive.V8ValueBoolean;
 import com.caoccao.javet.values.primitive.V8ValueDouble;
@@ -40,6 +43,8 @@ import model.AST;
  *	}
  *
  * Refs: https://flaviocopes.com/how-to-list-object-methods-javascript
+ * TODO Note: At this point with the way this class is used this could probably 
+ * be simply refactored into a singleton class
  */
 public interface JSMethods {
 	// console.log(...getAllMethods([]).sort())
@@ -73,16 +78,7 @@ public interface JSMethods {
 	static final String ANONYMOUS_FUNC_FORMAT = "(function() { %s; })()";
 	static final String REGEXP_CONSTRUCTOR = "/a/.constructor(\"%s\")";
 	
-	/* Default logger ignores everything */
-	static IJavetLogger LOGGER = new IJavetLogger() {
-		@Override public void debug(String message) {}
-		@Override public void error(String message) {}
-		@Override public void error(String message, Throwable cause) {}
-		@Override public void info(String message) {}
-		@Override public void warn(String message) {}
-	};
-	static JavetEngineConfig JAVET_ENGINE_CONFIG = new JavetEngineConfig().setJavetLogger(LOGGER);
-	static JavetEnginePool<V8Runtime> JAVET_ENGINE_POOL = new JavetEnginePool<>(JAVET_ENGINE_CONFIG);
+	static JavetEnginePool<V8Runtime> JAVET_ENGINE_POOL = createEnginePool();
 	
 	static AST execute(String code, FunctionCall call) {
 		try (IJavetEngine<V8Runtime> engine = JAVET_ENGINE_POOL.getEngine()) {
@@ -130,5 +126,34 @@ public interface JSMethods {
 		if (V8ValueFunction.class.isInstance(value))
 			return call;
 		throw new IllegalArgumentException("Did not implement conversion from Javet "+value+"("+value.getClass()+")");
+	}
+	
+	// Default logger ignores everything
+	static IJavetLogger defaultLogger() {
+		return new IJavetLogger() {
+			@Override public void debug(String message) {}
+			@Override public void error(String message) {}
+			@Override public void error(String message, Throwable cause) {}
+			@Override public void info(String message) {}
+			@Override public void warn(String message) {}
+		};
+	}
+	
+	// V8Flags settings reference: https://github.com/caoccao/Javet/discussions/187
+	static JavetEnginePool<V8Runtime> createEnginePool() {
+		JavetEngineConfig config = new JavetEngineConfig();
+		config.setJavetLogger(defaultLogger());
+		for (V8Flags v8Flags : new V8Flags[]{NodeRuntimeOptions.V8_FLAGS, V8RuntimeOptions.V8_FLAGS}) {
+            if (!v8Flags.isSealed()) {
+            	v8Flags.setUseStrict(false); // off to allow usage of deprecated octal numbers
+                v8Flags.setAllowNativesSyntax(true);
+                v8Flags.setExposeGC(false);
+                v8Flags.setExposeInspectorScripts(true);
+                v8Flags.setMaxHeapSize(768);
+                v8Flags.setMaxOldSpaceSize(512);
+                v8Flags.setTrackRetainingPath(true);
+            }
+        }
+		return new JavetEnginePool<>(config);
 	}
 }
